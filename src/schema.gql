@@ -1,0 +1,33 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createTodo(title: String!): Todo!
+  deleteTodo(id: Int!): Todo!
+  done(id: Int!): Todo!
+  undone(id: Int!): Todo!
+}
+
+type Query {
+  todo(id: Int!): Todo!
+  todos: [Todo!]!
+}
+
+type Subscription {
+  todoAdded: Todo!
+  todoChanged: Todo!
+  todoDeleted: Todo!
+}
+
+type Todo {
+  createdAt: DateTime!
+  done: Boolean!
+  id: Int!
+  title: String!
+}
