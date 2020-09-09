@@ -11,6 +11,7 @@ type Mutation {
   createTodo(title: String!): Todo!
   deleteTodo(id: Int!): Todo!
   done(id: Int!): Todo!
+  rename(id: Int!, title: String!): Todo!
   undone(id: Int!): Todo!
 }
 

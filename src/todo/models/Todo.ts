@@ -3,16 +3,16 @@ import { Field, Int, ObjectType } from '@nestjs/graphql';
 @ObjectType()
 export class Todo {
   @Field(type => Int)
-  id: number;
+  private id: number;
 
   @Field({ nullable: false })
-  title: string;
+  private title: string;
 
   @Field({ nullable: false })
-  createdAt: Date;
+  private createdAt: Date;
 
   @Field({ nullable: false })
-  done: boolean;
+  private done: boolean;
 
   markDone() {
       this.done = true;
@@ -20,6 +20,10 @@ export class Todo {
 
   markUndone() {
       this.done = false;
+  }
+
+  rename(withTitle: string) {
+      this.title = withTitle;
   }
 
   constructor(id: number, title: string, createdAt: Date, done = false) {

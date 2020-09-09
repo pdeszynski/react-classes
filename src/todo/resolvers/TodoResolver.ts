@@ -54,6 +54,17 @@ export class TodoResolver {
     return todo;
   }
 
+  @Mutation(returns => Todo)
+  rename(
+      @Args('id', { type: () => Int }) id: number,
+      @Args('title', { type: () => String }) withTitle: string): Todo {
+      const todo = this.todoList[id - 1];
+      if (!todo) return null;
+      todo.rename(withTitle);
+      pubsub.publish('todoChanged', { todoChanged: todo })
+      return todo;
+  }
+
   @Query(returns => [Todo])
   todos(): Array<Todo> {
     return this.todoList;
