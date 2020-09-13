@@ -1,42 +1,44 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Resolver, Args, Int, Query, Mutation, Subscription } from "@nestjs/graphql";
 import { Todo } from "../models/Todo";
 import { PubSub } from "graphql-subscriptions";
+import { Inject } from "@nestjs/common";
+import { Storage } from "../services";
+import IStorage from "../storage/IStorage";
 
 const pubsub = new PubSub();
 
 @Resolver(of => Todo)
 export class TodoResolver {
-    private todoList: Todo[] = []
   constructor(
-    // TODO: services    
+    @Inject(Storage) private readonly storage: IStorage<Todo, 'id'>,
   ) {}
 
   @Query(returns => Todo)
   async todo(@Args('id', { type: () => Int }) id: number) {
-    return this.todoList[id - 1] || null;
+    return this.storage.find(id) || null;
   }
 
   @Mutation(returns => Todo)
   createTodo(@Args('title', { type: () => String }) title: string): Todo {
-        const todo = new Todo(this.todoList.length + 1, title, new Date(), false);
-        this.todoList.push(todo);
+        const todo = new Todo(this.storage.count() + 1, title, new Date(), false);
+        this.storage.add(todo);
         pubsub.publish('todoAdded', { todoAdded: todo });
         return todo;
   }
 
   @Mutation(returns => Todo)
   deleteTodo(@Args('id', { type: () => Int }) id: number): Todo {
-    const todo = this.todoList[id - 1];
+    const todo = this.storage.remove(id);
     if (!todo) return null;
 
-    delete this.todoList[id]; // I do not use splice or side effect free approach as if using slice ids would change
     pubsub.publish('todoDeleted', { todoDeleted: todo });
     return todo;
   }
 
   @Mutation(returns => Todo)
   done(@Args('id', { type: () => Int }) id: number): Todo {
-    const todo = this.todoList[id - 1];
+    const todo = this.storage.find(id);
     if (!todo) return null;
 
     todo.markDone();
@@ -46,7 +48,7 @@ export class TodoResolver {
 
   @Mutation(returns => Todo)
   undone(@Args('id', { type: () => Int }) id: number): Todo {
-    const todo = this.todoList[id - 1];
+    const todo = this.storage.find(id);
     if (!todo) return null;
 
     todo.markUndone();
@@ -58,7 +60,7 @@ export class TodoResolver {
   rename(
       @Args('id', { type: () => Int }) id: number,
       @Args('title', { type: () => String }) withTitle: string): Todo {
-      const todo = this.todoList[id - 1];
+      const todo = this.storage.find(id);
       if (!todo) return null;
       todo.rename(withTitle);
       pubsub.publish('todoChanged', { todoChanged: todo })
@@ -67,7 +69,7 @@ export class TodoResolver {
 
   @Query(returns => [Todo])
   todos(): Array<Todo> {
-    return this.todoList;
+    return this.storage.all();
   }
 
   @Subscription(returns => Todo)

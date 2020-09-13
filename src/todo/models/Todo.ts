@@ -3,7 +3,7 @@ import { Field, Int, ObjectType } from '@nestjs/graphql';
 @ObjectType()
 export class Todo {
   @Field(type => Int)
-  private id: number;
+  public readonly id: number;
 
   @Field({ nullable: false })
   private title: string;
